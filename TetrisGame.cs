@@ -11,12 +11,6 @@ namespace Tetris2D
 {
     /// <summary>
     /// Ventana principal del juego (hereda de GameWindow de OpenTK).
-    ///
-    /// Responsabilidades:
-    ///  - Crear las herramientas de dibujo (shaders, dibujador y texto) una vez.
-    ///  - Mantener la camara ortografica en pixeles del framebuffer.
-    ///  - Repartir los eventos (mouse, teclado y texto) hacia la pantalla activa.
-    ///  - Al cambiar de pantalla, solo se sustituye _pantalla.
     /// </summary>
     public class TetrisGame : GameWindow
     {
@@ -48,15 +42,19 @@ namespace Tetris2D
             _pantalla = new PantallaBienvenida(_shaders, _cuadros, _texto);
             _pantalla.Cargar();
 
-            // FASE 2: aqui se conecta el cambio hacia el tablero. Ejemplo:
-            // _pantalla.JugarSolicitado += nombre => CambiarPantalla(new PantallaJuego(...));
+            // Suscribimos el evento de la pantalla de bienvenida: cuando el jugador
+            // presiona INICIAR, se lanza JugarSolicitado con su nombre y aqui se
+            // sustituye la pantalla por la de juego (el tablero de Tetris).
+            _pantalla.JugarSolicitado += nombre =>
+                CambiarPantalla(new PantallaJuego(_shaders, _cuadros, _texto, nombre));
         }
 
-        /// <summary>
-        /// Cada vez que cambia el tamaño de la ventana ajustamos el viewport de
-        /// OpenGL para que coincida con el framebuffer real (importante en
-        /// pantallas con alta densidad de pixeles / HiDPI).
-        /// </summary>
+        private void CambiarPantalla(Pantalla nueva)
+        {
+            _pantalla = nueva;
+            _pantalla.Cargar();
+        }
+
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
